@@ -11,6 +11,7 @@ const DB = path.join(ROOT, 'data', 'articles.json');
 const MAX_KEEP = 800;
 const BASE = cfg.basePath || '';
 const SITE = cfg.siteUrl.replace(/\/$/, '');
+const OFFERS = cfg.offers.filter(o => o.url && !/SEU-LINK/.test(o.url)); // só ofertas com link real
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const decode = s => s.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n));
@@ -73,8 +74,9 @@ const adSlot = pos => {
   return a.previewPlaceholders ? `<div class="ad ad-${pos} ad-ph"><small>Publicidade</small><span>Espaço de anúncio (${pos})</span></div>` : '';
 };
 const offerFor = (cat, page, n = 0) => {
-  const list = cfg.offers.filter(o => o.categories.includes(cat)); const o = (list.length ? list : cfg.offers)[n % (list.length || cfg.offers.length)];
-  return `<aside class="offer" data-offer="${esc(o.id)}"><span class="badge">${esc(o.badge)} · Patrocinado</span><h3>${esc(o.title)}</h3><p>${esc(o.text)}</p><a class="btn" rel="sponsored nofollow noopener" target="_blank" href="${esc(o.url.replace('{page}', page))}" data-offer-click="${esc(o.id)}">${esc(o.cta)} →</a></aside>`;
+  if (!OFFERS.length) return '';
+  const list = OFFERS.filter(o => o.categories.includes(cat)), pool = list.length ? list : OFFERS, o = pool[n % pool.length];
+  return `<aside class="offer" data-offer="${esc(o.id)}"><span class="badge">${esc(o.badge)} · Patrocinado</span><h3>${esc(o.title)}</h3><p>${esc(o.text)}</p><a class="btn" rel="sponsored nofollow noopener" target="_blank" href="${BASE}/go/${esc(o.id)}.html?p=${esc(page)}" data-offer-click="${esc(o.id)}">${esc(o.cta)} →</a></aside>`;
 };
 const card = (a, big = false) => `<article class="card${big ? ' big' : ''}"><a href="${BASE}/n/${a.slug}.html">${a.img ? `<img loading="lazy" src="${esc(a.img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : `<div class="noimg c-${a.cat}"></div>`}<div class="meta"><span class="chip">${esc(catName(a.cat))}</span><h3>${esc(a.title)}</h3><small>${esc(a.source)} · ${fmtDate(a.date)}</small></div></a></article>`;
 const nl = () => `<section class="newsletter"><h3>📬 Receba o resumo do dia</h3><p>As notícias e ofertas mais importantes no seu e-mail, grátis.</p>${cfg.newsletter.formAction ? `<form action="${esc(cfg.newsletter.formAction)}" method="post" target="_blank"><input type="email" name="email" placeholder="seu@email.com" required><button class="btn">Quero receber</button></form>` : `<small>(configure newsletter.formAction em config.json)</small>`}</section>`;
@@ -96,7 +98,7 @@ ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ''}</head><
 <footer><div class="wrap"><p>© ${new Date().getFullYear()} ${esc(cfg.name)} — Agregamos manchetes de veículos citados, sempre com link para a fonte original. Alguns links são de afiliados: podemos receber comissão sem custo extra para você.</p><p><a href="${BASE}/sobre.html">Sobre</a> · <a href="${BASE}/privacidade.html">Privacidade</a> · <a href="${BASE}/contato.html">Contato</a> · <a href="${BASE}/feed.xml">RSS</a></p></div></footer>
 <div id="stickybar" hidden></div>
 <div id="exitmodal" hidden><div class="modal"><button id="xclose" aria-label="Fechar">×</button>${nl()}</div></div>
-<script>window.__OFFERS=${JSON.stringify(cfg.offers.map(o => ({ id: o.id, t: o.title, c: o.cta, u: o.url.replace('{page}', 'sticky'), cats: o.categories })))};window.__CAT=${JSON.stringify(cat)};</script>
+<script>window.__OFFERS=${JSON.stringify(OFFERS.map(o => ({ id: o.id, t: o.title, c: o.cta, u: BASE + '/go/' + o.id + '.html?p=sticky', cats: o.categories })))};window.__CAT=${JSON.stringify(cat)};</script>
 <script src="${BASE}/assets/app.js" defer></script></body></html>`;
 }
 
@@ -163,6 +165,16 @@ page('sobre', 'Sobre', `<p>O ${esc(cfg.name)} reúne as principais manchetes do 
 page('privacidade', 'Política de Privacidade', `<p>Este site usa cookies e tecnologias semelhantes para exibir anúncios e medir audiência. Fornecedores terceiros, incluindo o Google, usam cookies para exibir anúncios com base em visitas anteriores. Você pode desativar a personalização em <a href="https://adssettings.google.com">adssettings.google.com</a>.</p><p>Coletamos o e-mail apenas se você se inscrever na newsletter, e você pode cancelar a qualquer momento. Em conformidade com a LGPD, você pode solicitar a exclusão de seus dados em ${esc(cfg.contactEmail)}.</p><p>Links marcados como "Patrocinado" são de afiliados; podemos receber comissão por compras ou cadastros realizados.</p>`);
 page('contato', 'Contato', `<p>Fale com a gente: <a href="mailto:${esc(cfg.contactEmail)}">${esc(cfg.contactEmail)}</a></p>`);
 write('404.html', layout({ title: 'Página não encontrada', desc: '404', path: '/404.html', body: `<h1>Página não encontrada</h1><p><a href="${BASE}/">Voltar ao início</a></p>` }));
+
+// redirecionador rastreável /go/<oferta>.html (para trocar um link, edite só o config.json)
+for (const o of OFFERS) {
+  const ga = cfg.analytics.ga4;
+  write(`go/${o.id}.html`, `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Redirecionando…</title>${ga ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(ga)}"></script>` : ''}<noscript><meta http-equiv="refresh" content="0;url=${esc(o.url.replace('{page}', 'nojs'))}"></noscript></head><body style="font-family:system-ui;text-align:center;padding:3rem">Levando você à oferta…<script>var p=new URLSearchParams(location.search).get('p')||'direto',u=${JSON.stringify(o.url)}.replace('{page}',encodeURIComponent(p)),done=0;function go(){if(!done){done=1;location.replace(u)}}try{window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());${ga ? `gtag('config','${esc(ga)}');` : ''}gtag('event','affiliate_redirect',{offer_id:'${o.id}',page:p,event_callback:go})}catch(e){}setTimeout(go,400)</script></body></html>`);
+}
+// simulador de receita
+write('painel.html', layout({ title: `Painel de receita | ${cfg.name}`, desc: 'Simulador de receita', path: '/painel.html', body: `<article class="post narrow"><h1>Painel de receita</h1><p>Simule quanto o site pode gerar. Use seus números reais do AdSense e dos programas de afiliados.</p>
+<p><label>Visitas por mês <input id="v" type="number" value="30000"></label></p><p><label>Páginas por visita <input id="pp" type="number" step="0.1" value="1.6"></label></p><p><label>RPM do AdSense (R$ por mil páginas) <input id="rpm" type="number" step="0.5" value="6"></label></p><p><label>% de visitas que clicam em ofertas CPA <input id="ctr" type="number" step="0.1" value="1.5"></label></p><p><label>% desses cliques que convertem <input id="cv" type="number" step="0.1" value="3"></label></p><p><label>Comissão média por conversão (R$) <input id="com" type="number" value="25"></label></p>
+<h2 id="out"></h2><p id="det"></p><script>(function(){var f=['v','pp','rpm','ctr','cv','com'].map(function(i){return document.getElementById(i)});function c(){var x=f.map(function(e){return +e.value||0}),ads=x[0]*x[1]/1000*x[2],cl=x[0]*x[3]/100,conv=cl*x[4]/100,cpa=conv*x[5],t=ads+cpa,b=function(n){return 'R$ '+n.toLocaleString('pt-BR',{maximumFractionDigits:0})};document.getElementById('out').textContent='Total estimado: '+b(t)+'/mês';document.getElementById('det').textContent='Anúncios: '+b(ads)+' · CPA: '+b(cpa)+' ('+Math.round(cl)+' cliques, '+conv.toFixed(1)+' conversões)'}f.forEach(function(e){e.oninput=c});c()})()</script></article>` }));
 
 // feed, sitemap, robots, ads.txt
 write('feed.xml', `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${esc(cfg.name)}</title><link>${SITE}/</link><description>${esc(cfg.tagline)}</description>${db.slice(0, 40).map(a => `<item><title>${esc(a.title)}</title><link>${SITE}/n/${a.slug}.html</link><guid>${a.id}</guid><pubDate>${new Date(a.date).toUTCString()}</pubDate><description>${esc(a.summary)}</description></item>`).join('')}</channel></rss>`);

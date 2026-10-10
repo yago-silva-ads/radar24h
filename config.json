@@ -1,0 +1,118 @@
+{
+  "name": "Radar 24h",
+  "tagline": "Notícias do Brasil e do mundo, ofertas e tecnologia — atualizado a cada hora",
+  "siteUrl": "https://yago-silva-ads.github.io/radar24h",
+  "basePath": "/radar24h",
+  "contactEmail": "contato@exemplo.com",
+  "analytics": { "ga4": "" },
+  "ads": {
+    "adsenseClient": "",
+    "slots": { "top": "", "inArticle": "", "sidebar": "", "bottom": "" },
+    "previewPlaceholders": true
+  },
+  "newsletter": { "formAction": "", "provider": "Buttondown/Mailchimp/Brevo: cole aqui a URL do formulário" },
+  "offers": [
+    {
+      "id": "cartao-sem-anuidade",
+      "title": "Cartão sem anuidade com cashback",
+      "text": "Compare e peça online em minutos. Sem taxa de adesão.",
+      "cta": "Ver cartões",
+      "url": "https://SEU-LINK-DE-AFILIADO?subid={page}",
+      "categories": ["economia", "brasil", "promocoes"],
+      "badge": "Finanças"
+    },
+    {
+      "id": "curso-online",
+      "title": "Cursos online com certificado",
+      "text": "Aprenda uma nova habilidade e dê um passo na carreira.",
+      "cta": "Conhecer cursos",
+      "url": "https://SEU-LINK-DE-AFILIADO?subid={page}",
+      "categories": ["educacao", "tecnologia", "mercado-digital"],
+      "badge": "Educação"
+    },
+    {
+      "id": "ofertas-do-dia",
+      "title": "Ofertas do dia nas maiores lojas",
+      "text": "Cupons e descontos selecionados todo dia.",
+      "cta": "Ver ofertas",
+      "url": "https://SEU-LINK-DE-AFILIADO?subid={page}",
+      "categories": ["promocoes", "tecnologia", "esportes"],
+      "badge": "Promoção"
+    },
+    {
+      "id": "ferramentas-negocio",
+      "title": "Comece seu negócio digital",
+      "text": "Hospedagem, e-mail marketing e ferramentas para criar sua renda online.",
+      "cta": "Ver ferramentas",
+      "url": "https://SEU-LINK-DE-AFILIADO?subid={page}",
+      "categories": ["mercado-digital", "tecnologia", "economia"],
+      "badge": "Negócios"
+    }
+  ],
+  "categories": [
+    {
+      "slug": "brasil", "name": "Brasil",
+      "feeds": [
+        { "name": "Agência Brasil", "url": "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml" },
+        { "name": "G1", "url": "https://g1.globo.com/rss/g1/" },
+        { "name": "Google Notícias", "url": "https://news.google.com/rss?hl=pt-BR&gl=BR&ceid=BR:pt-419" }
+      ]
+    },
+    {
+      "slug": "mundo", "name": "Mundo",
+      "feeds": [
+        { "name": "BBC Brasil", "url": "https://feeds.bbci.co.uk/portuguese/rss.xml" },
+        { "name": "DW Brasil", "url": "https://rss.dw.com/xml/rss-br-all" },
+        { "name": "Google Notícias", "url": "https://news.google.com/rss/headlines/section/topic/WORLD?hl=pt-BR&gl=BR&ceid=BR:pt-419" }
+      ]
+    },
+    {
+      "slug": "politica", "name": "Política",
+      "feeds": [
+        { "name": "G1 Política", "url": "https://g1.globo.com/rss/g1/politica/" },
+        { "name": "Google Notícias", "url": "https://news.google.com/rss/search?q=pol%C3%ADtica+Brasil&hl=pt-BR&gl=BR&ceid=BR:pt-419" }
+      ]
+    },
+    {
+      "slug": "esportes", "name": "Esportes",
+      "feeds": [
+        { "name": "ge", "url": "https://ge.globo.com/rss/ge/" },
+        { "name": "Google Notícias", "url": "https://news.google.com/rss/headlines/section/topic/SPORTS?hl=pt-BR&gl=BR&ceid=BR:pt-419" }
+      ]
+    },
+    {
+      "slug": "educacao", "name": "Educação",
+      "feeds": [
+        { "name": "G1 Educação", "url": "https://g1.globo.com/rss/g1/educacao/" },
+        { "name": "Google Notícias", "url": "https://news.google.com/rss/search?q=educa%C3%A7%C3%A3o+OR+enem+OR+faculdade&hl=pt-BR&gl=BR&ceid=BR:pt-419" }
+      ]
+    },
+    {
+      "slug": "tecnologia", "name": "Tecnologia",
+      "feeds": [
+        { "name": "Tecmundo", "url": "https://rss.tecmundo.com.br/feed" },
+        { "name": "Canaltech", "url": "https://canaltech.com.br/rss/" },
+        { "name": "Olhar Digital", "url": "https://olhardigital.com.br/feed/" }
+      ]
+    },
+    {
+      "slug": "promocoes", "name": "Promoções",
+      "feeds": [
+        { "name": "Google Notícias", "url": "https://news.google.com/rss/search?q=promo%C3%A7%C3%A3o+OR+cupom+OR+desconto+OR+oferta&hl=pt-BR&gl=BR&ceid=BR:pt-419" }
+      ]
+    },
+    {
+      "slug": "economia", "name": "Economia",
+      "feeds": [
+        { "name": "G1 Economia", "url": "https://g1.globo.com/rss/g1/economia/" },
+        { "name": "Google Notícias", "url": "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=pt-BR&gl=BR&ceid=BR:pt-419" }
+      ]
+    },
+    {
+      "slug": "mercado-digital", "name": "Mercado Digital",
+      "feeds": [
+        { "name": "Google Notícias", "url": "https://news.google.com/rss/search?q=%22marketing+digital%22+OR+e-commerce+OR+%22marketing+de+afiliados%22+OR+criptomoedas&hl=pt-BR&gl=BR&ceid=BR:pt-419" }
+      ]
+    }
+  ]
+}

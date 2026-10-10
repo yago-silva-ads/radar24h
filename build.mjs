@@ -88,18 +88,18 @@ function layout({ title, desc, path: p, body, cat = '', ogImg = '', type = 'webs
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${url}">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:type" content="${type}"><meta property="og:url" content="${url}">${ogImg ? `<meta property="og:image" content="${esc(ogImg)}">` : ''}<meta name="twitter:card" content="summary_large_image">
-<link rel="alternate" type="application/rss+xml" title="${esc(cfg.name)}" href="${BASE}/feed.xml"><link rel="stylesheet" href="${BASE}/assets/style.css"><meta name="theme-color" content="#0b5fff">
+<link rel="alternate" type="application/rss+xml" title="${esc(cfg.name)}" href="${BASE}/feed.xml"><link rel="stylesheet" href="${BASE}/assets/style.css"><link rel="stylesheet" href="${BASE}/assets/extra.css"><meta name="theme-color" content="#0b5fff"><link rel="manifest" href="${BASE}/manifest.webmanifest"><link rel="icon" href="${BASE}/assets/icon.svg" type="image/svg+xml">
 ${a.adsenseClient ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${esc(a.adsenseClient)}" crossorigin="anonymous"></script>` : ''}
 ${ga ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(ga)}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(ga)}')</script>` : ''}
 ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ''}</head><body>
 <div id="progress"></div>
-<header><div class="wrap bar"><a class="logo" href="${BASE}/">${esc(cfg.name)}<small>${esc(cfg.tagline)}</small></a></div><nav class="wrap"><a href="${BASE}/">Início</a>${nav}<a href="${BASE}/guias/">Guias</a></nav></header>
+<header><div class="wrap bar"><a class="logo" href="${BASE}/">${esc(cfg.name)}<small>${esc(cfg.tagline)}</small></a><div class="search"><input id="q" type="search" placeholder="Buscar notícias…" autocomplete="off" aria-label="Buscar"><div id="qres" hidden></div></div></div><nav class="wrap"><a href="${BASE}/">Início</a>${nav}<a href="${BASE}/guias/">Guias</a></nav></header>
 <main class="wrap">${body}</main>
 <footer><div class="wrap"><p>© ${new Date().getFullYear()} ${esc(cfg.name)} — Agregamos manchetes de veículos citados, sempre com link para a fonte original. Alguns links são de afiliados: podemos receber comissão sem custo extra para você.</p><p><a href="${BASE}/sobre.html">Sobre</a> · <a href="${BASE}/privacidade.html">Privacidade</a> · <a href="${BASE}/contato.html">Contato</a> · <a href="${BASE}/feed.xml">RSS</a></p></div></footer>
 <div id="stickybar" hidden></div>
 <div id="exitmodal" hidden><div class="modal"><button id="xclose" aria-label="Fechar">×</button>${nl()}</div></div>
-<script>window.__OFFERS=${JSON.stringify(OFFERS.map(o => ({ id: o.id, t: o.title, c: o.cta, u: BASE + '/go/' + o.id + '.html?p=sticky', cats: o.categories })))};window.__CAT=${JSON.stringify(cat)};</script>
-<script src="${BASE}/assets/app.js" defer></script></body></html>`;
+<script>window.__OFFERS=${JSON.stringify(OFFERS.map(o => ({ id: o.id, t: o.title, c: o.cta, u: BASE + '/go/' + o.id + '.html?p=sticky', cats: o.categories })))};window.__CAT=${JSON.stringify(cat)};window.__BASE=${JSON.stringify(BASE)};</script>
+<script src="${BASE}/assets/app.js" defer></script><script src="${BASE}/assets/search.js" defer></script></body></html>`;
 }
 
 const write = (rel, content) => { const f = path.join(DIST, rel); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, content); };
@@ -142,6 +142,7 @@ for (const a of db) {
     body: `${adSlot('top')}<div class="cols"><article class="post"><span class="chip">${esc(catName(a.cat))}</span><h1>${esc(a.title)}</h1><p class="by">Fonte: <strong>${esc(a.source)}</strong> · ${fmtDate(a.date)}</p>
 ${a.img ? `<img class="cover" src="${esc(a.img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
 ${a.summary ? `<p class="lead">${esc(a.summary)}</p>` : ''}
+<div class="share"><a target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(a.title + ' ' + SITE + '/n/' + a.slug + '.html')}">WhatsApp</a><a target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(a.title)}&url=${encodeURIComponent(SITE + '/n/' + a.slug + '.html')}">X</a><button type="button" data-copy="${SITE}/n/${a.slug}.html">Copiar link</button></div>
 ${adSlot('inArticle')}
 <a class="btn big" id="readsrc" target="_blank" rel="noopener nofollow" href="${esc(a.link)}">Ler matéria completa em ${esc(a.source)} ↗</a>
 ${offerFor(a.cat, 'post-' + a.id, 1)}
@@ -175,6 +176,10 @@ for (const o of OFFERS) {
 write('painel.html', layout({ title: `Painel de receita | ${cfg.name}`, desc: 'Simulador de receita', path: '/painel.html', body: `<article class="post narrow"><h1>Painel de receita</h1><p>Simule quanto o site pode gerar. Use seus números reais do AdSense e dos programas de afiliados.</p>
 <p><label>Visitas por mês <input id="v" type="number" value="30000"></label></p><p><label>Páginas por visita <input id="pp" type="number" step="0.1" value="1.6"></label></p><p><label>RPM do AdSense (R$ por mil páginas) <input id="rpm" type="number" step="0.5" value="6"></label></p><p><label>% de visitas que clicam em ofertas CPA <input id="ctr" type="number" step="0.1" value="1.5"></label></p><p><label>% desses cliques que convertem <input id="cv" type="number" step="0.1" value="3"></label></p><p><label>Comissão média por conversão (R$) <input id="com" type="number" value="25"></label></p>
 <h2 id="out"></h2><p id="det"></p><script>(function(){var f=['v','pp','rpm','ctr','cv','com'].map(function(i){return document.getElementById(i)});function c(){var x=f.map(function(e){return +e.value||0}),ads=x[0]*x[1]/1000*x[2],cl=x[0]*x[3]/100,conv=cl*x[4]/100,cpa=conv*x[5],t=ads+cpa,b=function(n){return 'R$ '+n.toLocaleString('pt-BR',{maximumFractionDigits:0})};document.getElementById('out').textContent='Total estimado: '+b(t)+'/mês';document.getElementById('det').textContent='Anúncios: '+b(ads)+' · CPA: '+b(cpa)+' ('+Math.round(cl)+' cliques, '+conv.toFixed(1)+' conversões)'}f.forEach(function(e){e.oninput=c});c()})()</script></article>` }));
+
+// busca no cliente, manifesto PWA
+write('search.json', JSON.stringify([...guides.map(g => [g.title, `guias/${g.slug}.html`, catName(g.cat)]), ...db.map(a => [a.title, `n/${a.slug}.html`, catName(a.cat)])]));
+write('manifest.webmanifest', JSON.stringify({ name: cfg.name, short_name: cfg.name, start_url: BASE + '/', scope: BASE + '/', display: 'standalone', background_color: '#f6f7fb', theme_color: '#0b5fff', icons: [{ src: BASE + '/assets/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }] }));
 
 // feed, sitemap, robots, ads.txt
 write('feed.xml', `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${esc(cfg.name)}</title><link>${SITE}/</link><description>${esc(cfg.tagline)}</description>${db.slice(0, 40).map(a => `<item><title>${esc(a.title)}</title><link>${SITE}/n/${a.slug}.html</link><guid>${a.id}</guid><pubDate>${new Date(a.date).toUTCString()}</pubDate><description>${esc(a.summary)}</description></item>`).join('')}</channel></rss>`);
